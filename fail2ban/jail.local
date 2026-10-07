@@ -1,0 +1,21 @@
+# File ini di-mount otomatis ke container portal-fail2ban lewat docker-compose.yml
+# (volume: ./fail2ban/jail.local:/data/jail.d/jail.local)
+# Tidak perlu di-copy manual ke /etc/fail2ban - cukup edit file ini lalu:
+#   docker compose restart fail2ban
+
+[DEFAULT]
+bantime  = 600
+findtime = 300
+maxretry = 5
+# karena container fail2ban berbagi network namespace dengan nginx (network_mode: service:nginx),
+# iptables ban di sini langsung memblokir traffic yang menuju container nginx itu sendiri
+banaction = iptables-multiport
+
+# Brute force login Portal Akademik via nginx access log
+[portal-login]
+enabled  = true
+port     = http,https
+filter   = portal-login
+logpath  = /var/log/nginx/portal-access.log
+maxretry = 5
+bantime  = 900
